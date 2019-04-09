@@ -975,7 +975,7 @@ namespace FluentAssertions.Specs
             // Arrange
             //-----------------------------------------------------------------------------------------------------------
             var watch = Stopwatch.StartNew();
-            var waitTime = 100.Milliseconds();
+            var waitTime = 1000.Milliseconds();
             var pollInterval = 10.Milliseconds();
 
             Action throwShorterThanWaitTime = () =>
@@ -989,12 +989,12 @@ namespace FluentAssertions.Specs
             //-----------------------------------------------------------------------------------------------------------
             // Act
             //-----------------------------------------------------------------------------------------------------------
-            Action act = () => throwShorterThanWaitTime.Should().NotThrowAfter(waitTime, pollInterval);
+            Action act = () => throwShorterThanWaitTime.Should().NotThrow();
 
             //-----------------------------------------------------------------------------------------------------------
             // Assert
             //-----------------------------------------------------------------------------------------------------------
-            act.Should().NotThrow();
+            act.Should().NotThrowAfter(waitTime, pollInterval);
         }
 #endif // NotThrowAfter tests
 

@@ -593,6 +593,7 @@ namespace FluentAssertions.Specs
                 .WithMessage("* value of pollInterval must be non-negative*");
         }
 
+#if !NETSTANDARD1_3 && !NETCOREAPP1_1
         [Fact]
         public void
             When_no_exception_should_be_thrown_for_async_func_executed_with_wait_after_wait_time_but_it_was_it_should_throw()
@@ -617,16 +618,21 @@ namespace FluentAssertions.Specs
             //-----------------------------------------------------------------------------------------------------------
             // Act
             //-----------------------------------------------------------------------------------------------------------
-            Action action = () => throwLongerThanWaitTime.Should()
-                .NotThrowAfter(waitTime, pollInterval, "we passed valid arguments");
+
+            Action act = () =>
+            {
+                Action innerAct = () => throwLongerThanWaitTime.Should().NotThrow(); 
+                innerAct.Should().NotThrowAfter(waitTime, pollInterval);
+            };
 
             //-----------------------------------------------------------------------------------------------------------
             // Assert
             //-----------------------------------------------------------------------------------------------------------
-            action.Should().Throw<XunitException>()
-                .WithMessage("Did not expect any exceptions after 2s because we passed valid arguments*");
+            act.Should().Throw<XunitException>().WithMessage("Did not expect any exceptions after 2s*");
         }
+#endif
 
+#if !NETSTANDARD1_3 && !NETCOREAPP1_1
         [Fact]
         public void When_no_exception_should_be_thrown_for_async_func_executed_with_wait_after_wait_time_and_none_was_it_should_not_throw()
         {
@@ -649,13 +655,14 @@ namespace FluentAssertions.Specs
             //-----------------------------------------------------------------------------------------------------------
             // Act
             //-----------------------------------------------------------------------------------------------------------
-            Action act = () => throwShorterThanWaitTime.Should().NotThrowAfter(waitTime, pollInterval);
+            Action act = () => throwShorterThanWaitTime.Should().NotThrow();
 
             //-----------------------------------------------------------------------------------------------------------
             // Assert
             //-----------------------------------------------------------------------------------------------------------
-            act.Should().NotThrow();
+            act.Should().NotThrowAfter(waitTime, pollInterval);
         }
+#endif
 
         #endregion
 
@@ -711,7 +718,7 @@ namespace FluentAssertions.Specs
         }
 
         [Fact]
-        public void When_no_exception_should_be_thrown_for_async_func_after_wait_time_but_it_was_it_should_throw()
+        public async Task When_no_exception_should_be_thrown_for_async_func_after_wait_time_but_it_was_it_should_throw()
         {
             //-----------------------------------------------------------------------------------------------------------
             // Arrange
@@ -733,19 +740,24 @@ namespace FluentAssertions.Specs
             //-----------------------------------------------------------------------------------------------------------
             // Act
             //-----------------------------------------------------------------------------------------------------------
-            Func<Task> action = async () =>
-                await throwLongerThanWaitTime.Should()
-                    .NotThrowAfterAsync(waitTime, pollInterval, "we passed valid arguments");
+            Func<Task> act = async () =>
+            {
+                Func<Task> innerAct = async () =>
+                {
+                    throwLongerThanWaitTime.Should().NotThrow();
+                    await Task.Delay(0);
+                };
+                await innerAct.Should().NotThrowAfterAsync(waitTime, pollInterval);
+            };
 
             //-----------------------------------------------------------------------------------------------------------
             // Assert
             //-----------------------------------------------------------------------------------------------------------
-            action.Should().Throw<XunitException>()
-                .WithMessage("Did not expect any exceptions after 2s because we passed valid arguments*");
+            (await act.Should().ThrowAsync<XunitException>()).WithMessage("Did not expect any exceptions after 2s*"); 
         }
 
         [Fact]
-        public void When_no_exception_should_be_thrown_for_async_func_after_wait_time_and_none_was_it_should_not_throw()
+        public async Task When_no_exception_should_be_thrown_for_async_func_after_wait_time_and_none_was_it_should_not_throw()
         {
             //-----------------------------------------------------------------------------------------------------------
             // Arrange
@@ -767,13 +779,17 @@ namespace FluentAssertions.Specs
             //-----------------------------------------------------------------------------------------------------------
             // Act
             //-----------------------------------------------------------------------------------------------------------
-            Func<Task> act = async () =>
-                await throwShorterThanWaitTime.Should().NotThrowAfterAsync(waitTime, pollInterval);
+
+            Func<Task> act = () =>
+            {
+                throwShorterThanWaitTime.Should().NotThrow();
+                return Task.Delay(0);
+            };
 
             //-----------------------------------------------------------------------------------------------------------
             // Assert
             //-----------------------------------------------------------------------------------------------------------
-            act.Should().NotThrow();
+            await act.Should().NotThrowAfterAsync(waitTime, pollInterval);
         }
 
         #endregion

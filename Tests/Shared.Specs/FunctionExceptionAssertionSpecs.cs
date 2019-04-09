@@ -419,7 +419,8 @@ namespace FluentAssertions.Specs
             // Arrange
             //-----------------------------------------------------------------------------------------------------------
             var watch = Stopwatch.StartNew();
-            var waitTime = 100.Milliseconds();
+            var waitTime = 1000.Milliseconds();
+
             var pollInterval = 10.Milliseconds();
 
             Func<int> throwShorterThanWaitTime = () =>
@@ -435,12 +436,12 @@ namespace FluentAssertions.Specs
             //-----------------------------------------------------------------------------------------------------------
             // Act
             //-----------------------------------------------------------------------------------------------------------
-            Action act = () => throwShorterThanWaitTime.Should().NotThrowAfter(waitTime, pollInterval);
+            Action act = () => throwShorterThanWaitTime.Should().NotThrow();
 
             //-----------------------------------------------------------------------------------------------------------
             // Assert
             //-----------------------------------------------------------------------------------------------------------
-            act.Should().NotThrow();
+            act.Should().NotThrowAfter(waitTime, pollInterval);
         }
 
         [Fact]
@@ -450,7 +451,7 @@ namespace FluentAssertions.Specs
             // Arrange
             //-----------------------------------------------------------------------------------------------------------
             var watch = Stopwatch.StartNew();
-            var waitTime = 100.Milliseconds();
+            var waitTime = 1000.Milliseconds();
             var pollInterval = 10.Milliseconds();
 
             Func<int> throwShorterThanWaitTime = () =>
@@ -466,13 +467,12 @@ namespace FluentAssertions.Specs
             //-----------------------------------------------------------------------------------------------------------
             // Act
             //-----------------------------------------------------------------------------------------------------------
-            AndWhichConstraint<FunctionAssertions<int>, int> act =
-                throwShorterThanWaitTime.Should().NotThrowAfter(waitTime, pollInterval);
+            Action act = () => throwShorterThanWaitTime().Should().Be(42);
 
             //-----------------------------------------------------------------------------------------------------------
             // Assert
             //-----------------------------------------------------------------------------------------------------------
-            act.Subject.Should().Be(42);
+            act.Should().NotThrowAfter(waitTime, pollInterval);
         }
 #endif // NotThrowAfter tests
         #endregion
